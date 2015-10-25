@@ -8,32 +8,35 @@ namespace NetworkRouting
 {
     class PQ
     {
-        private List<Node> heap = new List<Node>();
-        private List<int> lookupTable = new List<int>();
+        private List<HeapNode> heap = new List<HeapNode>();
+        private List<LookupNode> lookupTable = new List<LookupNode>();
 
         // MARK: INITIALIZER
         public PQ(int lookupTableSize)
         {
             for (int i = 0; i < lookupTableSize; i++)
             {
-                lookupTable.Add(-1);   
+                lookupTable.Add(new LookupNode());   
             }
         }
 
         // MARK: PRIMARY METHODS
         public void Add(int lookupIndex, double value, int backPointer)
         {
-            lookupTable[lookupIndex] = heap.Count;
-            heap.Add(new Node(lookupIndex, value, backPointer));
+            lookupTable[lookupIndex].heapIndex = heap.Count;
+            heap.Add(new HeapNode(lookupIndex, value, backPointer));
 
             BubbleUp(heap.Count - 1);
         }
 
         public int PopMin()
         {
-            Node minNode = heap[0];
+            HeapNode minNode = heap[0];
             heap[0] = heap[heap.Count - 1];
+            lookupTable[heap[0].LOOKUPINDEX].heapIndex = 0;
+
             heap.RemoveAt(heap.Count - 1);
+            lookupTable[minNode.LOOKUPINDEX].backPointer = minNode.backPointer;
 
             BubbleDown(0);
 
@@ -42,9 +45,9 @@ namespace NetworkRouting
 
         public void DecreaseKey(int lookupTableIndex, double newPathValue, int newBackPointer)
         {
-            int heapIndex = lookupTable[lookupTableIndex];
+            int heapIndex = lookupTable[lookupTableIndex].heapIndex;
             heap[heapIndex].pathCost = newPathValue;
-            heap[lookupTable[lookupTableIndex]].backPointer = newBackPointer;
+            heap[lookupTable[lookupTableIndex].heapIndex].backPointer = newBackPointer;
 
             BubbleUp(heapIndex);
         }
@@ -54,17 +57,11 @@ namespace NetworkRouting
             return heap.Count <= 0;
         }
 
-        public void UpdatePathCost(int lookupIndex, double newPathCost)
-        {
-
-        }
-
         public double GetPathCost(int lookupIndex)
         {
-
             if (NodeIsAdded(lookupIndex))
             {
-                return heap[lookupTable[lookupIndex]].pathCost;
+                return heap[lookupTable[lookupIndex].heapIndex].pathCost;
             }
 
             return -1;
@@ -72,17 +69,17 @@ namespace NetworkRouting
 
         public int GetBackPointer(int lookupIndex)
         {
-            return lookupIndex[]
+            return lookupTable[lookupIndex].backPointer;
         }
 
         public bool NodeIsAdded(int lookupIndex)
         {
-            return lookupTable[lookupIndex] != -1;
+            return lookupTable[lookupIndex].heapIndex != -1;
         }
 
         public bool NodeIsVisited(int lookupIndex)
         {
-            return lookupTable[lookupIndex] == 0 && heap[0].LOOKUPINDEX != lookupIndex;
+            return lookupTable[lookupIndex].heapIndex == 0 && heap[0].LOOKUPINDEX != lookupIndex;
         }
 
         // MARK: HELPER METHODS
@@ -129,10 +126,10 @@ namespace NetworkRouting
         private void SwapIndices(int i1, int i2)
         {
             // Swap lookupTable values.
-            lookupTable[heap[i1].LOOKUPINDEX] = i2;
-            lookupTable[heap[i2].LOOKUPINDEX] = i1;
+            lookupTable[heap[i1].LOOKUPINDEX].heapIndex = i2;
+            lookupTable[heap[i2].LOOKUPINDEX].heapIndex = i1;
 
-            Node tempNode = heap[i1];
+            HeapNode tempNode = heap[i1];
 
             // Perform Node swap.
             heap[i1] = heap[i2];

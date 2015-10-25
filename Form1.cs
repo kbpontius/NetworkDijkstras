@@ -12,6 +12,8 @@ namespace NetworkRouting
 {
     public partial class Form1 : Form
     {
+        Pen pen = new Pen(Color.Red, 1f);
+
         public Form1()
         {
             InitializeComponent();
@@ -33,6 +35,8 @@ namespace NetworkRouting
             stopNodeIndex = -1;
             sourceNodeBox.Text = "";
             targetNodeBox.Text = "";
+            sourceNodeBox.Enabled = true;
+            targetNodeBox.Enabled = true;
         }
 
         // Generates the distance matrix.  Values of -1 indicate a missing edge.  Loopbacks are at a cost of 0.
@@ -91,15 +95,62 @@ namespace NetworkRouting
         // Use this to generate routing tables for every node
         private void solveButton_Click(object sender, EventArgs e)
         {
-            if(startNodeIndex != -1 && stopNodeIndex != -1)
+            LoadStartEndIndices();
+
+            if (startNodeIndex != -1 && stopNodeIndex != -1)
             {
                 Dijkstras dk = new Dijkstras(startNodeIndex, stopNodeIndex, points, adjacencyList);
-                dk.ResolvePath();
+                List<int> backPointerList = dk.ResolvePath();
+
+                if (backPointerList.Count > 0)
+                {
+                    DrawLineList(backPointerList);
+                }
+                else
+                {
+                    pathCostBox.Text = "Unreachable.";
+                }
             }
             else
             {
                 seedUsedLabel.Text = "Invalid start/end nodes";
             }
+        }
+
+        private void LoadStartEndIndices()
+        {
+            int desiredStartIndex = Convert.ToInt32(sourceNodeBox.Text);
+            int desiredStopIndex = Convert.ToInt32(targetNodeBox.Text);
+
+            if (desiredStartIndex < points.Count
+                    && desiredStartIndex >= 0)
+            {
+                startNodeIndex = desiredStartIndex;
+            }
+
+            if (desiredStopIndex < points.Count
+                    && desiredStopIndex >= 0)
+            {
+                stopNodeIndex = desiredStopIndex;
+            }
+
+            paintStartStopPoints();
+        }
+
+        private void DrawLineList(List<int> pointerList)
+        {
+            for (int i = 0; i < pointerList.Count - 2; i++)
+            {
+                DrawLine(points[pointerList[i]], points[pointerList[i + 1]]);
+            }
+
+            DrawLine(points[pointerList[pointerList.Count - 2]], points[pointerList[pointerList.Count - 1]]);
+        }
+
+        private void DrawLine(PointF point1, PointF point2)
+        {
+            graphics.DrawLine(pen, point1, point2);
+            pictureBox.Refresh();
         }
 
         private Boolean startStopToggle = true;

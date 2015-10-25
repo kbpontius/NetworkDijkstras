@@ -53,7 +53,8 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="Node.cs" />
+    <Compile Include="HeapNode.cs" />
+    <Compile Include="LookupNode.cs" />
     <Compile Include="PQ.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -27,15 +27,16 @@ namespace NetworkRouting
         }
 
         // MARK: PRIMARY METHODS
-        public void ResolvePath()
+        public List<int> ResolvePath()
         {
+            List<int> backPointerList = new List<int>();
+
             populateOnePath(startIndex);
             int currentIndex = startIndex;
+            currentIndex = pq.PopMin();
 
             while (!pq.IsEmpty())
             {
-                currentIndex = pq.PopMin();
-
                 if (currentIndex == endIndex) { break; }
 
                 foreach (int lookupIndex in adjacencyList[currentIndex])
@@ -52,16 +53,27 @@ namespace NetworkRouting
                         pq.DecreaseKey(lookupIndex, newPathCost, currentIndex);
                     }
                 }
+
+                currentIndex = pq.PopMin();
             }
 
             if (currentIndex == endIndex)
             {
-                int backPointer = pq.Get
-                while ()
+                int backPointer = -1;
+                backPointerList.Add(currentIndex);
+
+                while (currentIndex != startIndex)
+                {
+                    backPointer = pq.GetBackPointer(currentIndex);
+                    currentIndex = backPointer;
+                    backPointerList.Add(currentIndex);
+                }
+
+                return backPointerList;
             }
             else
             {
-                Console.Write("CANNOT GET TO ENDPOINT");
+                return backPointerList;
             }
         }
 
