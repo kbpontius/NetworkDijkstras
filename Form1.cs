@@ -91,8 +91,15 @@ namespace NetworkRouting
         // Use this to generate routing tables for every node
         private void solveButton_Click(object sender, EventArgs e)
         {
-            Dijkstras dk = new Dijkstras(points, adjacencyList);
-            dk.resolvePath();
+            if(startNodeIndex != -1 && stopNodeIndex != -1)
+            {
+                Dijkstras dk = new Dijkstras(startNodeIndex, stopNodeIndex, points, adjacencyList);
+                dk.ResolvePath();
+            }
+            else
+            {
+                seedUsedLabel.Text = "Invalid start/end nodes";
+            }
         }
 
         private Boolean startStopToggle = true;
