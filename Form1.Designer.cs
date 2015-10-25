@@ -138,21 +138,21 @@
             this.sourceNodeBox.Enabled = false;
             this.sourceNodeBox.Location = new System.Drawing.Point(89, 344);
             this.sourceNodeBox.Name = "sourceNodeBox";
-            this.sourceNodeBox.Size = new System.Drawing.Size(25, 20);
+            this.sourceNodeBox.Size = new System.Drawing.Size(38, 20);
             this.sourceNodeBox.TabIndex = 11;
             // 
             // targetNodeBox
             // 
             this.targetNodeBox.Enabled = false;
-            this.targetNodeBox.Location = new System.Drawing.Point(193, 343);
+            this.targetNodeBox.Location = new System.Drawing.Point(206, 343);
             this.targetNodeBox.Name = "targetNodeBox";
-            this.targetNodeBox.Size = new System.Drawing.Size(25, 20);
+            this.targetNodeBox.Size = new System.Drawing.Size(40, 20);
             this.targetNodeBox.TabIndex = 13;
             // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(120, 350);
+            this.label4.Location = new System.Drawing.Point(133, 351);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(67, 13);
             this.label4.TabIndex = 12;
