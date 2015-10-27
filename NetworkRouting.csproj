@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Dijkstras.cs" />
+    <Compile Include="Edge.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>

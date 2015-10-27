@@ -21,10 +21,10 @@ namespace NetworkRouting
         }
 
         // MARK: PRIMARY METHODS
-        public void Add(int lookupIndex, double value, int backPointer)
+        public void Add(int lookupIndex, double pathCost, int backPointer)
         {
             lookupTable[lookupIndex].heapIndex = heap.Count;
-            heap.Add(new HeapNode(lookupIndex, value, backPointer));
+            heap.Add(new HeapNode(lookupIndex, pathCost, backPointer));
 
             BubbleUp(heap.Count - 1);
         }
@@ -34,6 +34,7 @@ namespace NetworkRouting
             HeapNode minNode = heap[0];
             heap[0] = heap[heap.Count - 1];
             lookupTable[heap[0].LOOKUPINDEX].heapIndex = 0;
+            lookupTable[heap[0].LOOKUPINDEX].pathCost = minNode.pathCost;
 
             heap.RemoveAt(heap.Count - 1);
             lookupTable[minNode.LOOKUPINDEX].backPointer = minNode.backPointer;
@@ -62,6 +63,16 @@ namespace NetworkRouting
             if (NodeIsAdded(lookupIndex))
             {
                 return heap[lookupTable[lookupIndex].heapIndex].pathCost;
+            }
+
+            return -1;
+        }
+
+        public double GetFinalPathCost(int lookupIndex)
+        {
+            if (NodeIsAdded(lookupIndex))
+            {
+                return lookupTable[lookupIndex].pathCost;
             }
 
             return -1;
@@ -165,8 +176,8 @@ namespace NetworkRouting
         // MARK: VALUE METHODS
         private int GetMinChildIndex(int index)
         {
-            double leftChildValue = int.MaxValue;
-            double rightChildValue = int.MaxValue;
+            double leftChildValue = double.MaxValue;
+            double rightChildValue = double.MaxValue;
 
             if (HasLeftChild(index))
             {
@@ -176,6 +187,10 @@ namespace NetworkRouting
             if (HasRightChild(index))
             {
                 rightChildValue = GetRightChildValue(index);
+            }
+            else
+            {
+                return GetLeftChildIndex(index);
             }
 
             if (leftChildValue < rightChildValue)

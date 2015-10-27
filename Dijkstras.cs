@@ -22,19 +22,39 @@ namespace NetworkRouting
             this.endIndex = endIndex;
             this.points = points;
             this.adjacencyList = adjacencyList;
-
-            pq = new PQ(points.Count);
         }
 
         // MARK: PRIMARY METHODS
-        public List<int> ResolvePath()
+        public List<Edge> CalculateAllPaths()
         {
-            List<int> backPointerList = new List<int>();
+            pq = new PQ(points.Count);
+            populateAllPaths(startIndex);
+
+            int currentIndex = CalculateResults(startIndex);
+
+            return CompileResults(currentIndex);
+        }
+
+        public List<Edge> CalculateOnePath()
+        {
+            pq = new PQ(points.Count);
 
             populateOnePath(startIndex);
-            int currentIndex = startIndex;
-            currentIndex = pq.PopMin();
+            int currentIndex = pq.PopMin();
 
+            currentIndex = CalculateResults(currentIndex);
+
+            return CompileResults(currentIndex);
+        }
+
+        // MARK: HELPER METHODS
+        public static double GetDistance(PointF p1, PointF p2)
+        {
+            return Math.Sqrt(Math.Pow(p2.Y - p1.Y, 2) + Math.Pow(p2.X - p1.X, 2));
+        }
+
+        private int CalculateResults(int currentIndex)
+        {
             while (!pq.IsEmpty())
             {
                 if (currentIndex == endIndex) { break; }
@@ -55,29 +75,37 @@ namespace NetworkRouting
                 }
 
                 currentIndex = pq.PopMin();
+
+                if (currentIndex == startIndex)
+                {
+                    currentIndex = pq.PopMin();
+                }
             }
+
+            return currentIndex;
+        }
+
+        private List<Edge> CompileResults(int currentIndex)
+        {
+            List<Edge> edgeList = new List<Edge>();
 
             if (currentIndex == endIndex)
             {
-                int backPointer = -1;
-                backPointerList.Add(currentIndex);
-
                 while (currentIndex != startIndex)
                 {
-                    backPointer = pq.GetBackPointer(currentIndex);
+                    int backPointer = pq.GetBackPointer(currentIndex);
+                    edgeList.Add(new Edge(points[currentIndex], points[backPointer]));
                     currentIndex = backPointer;
-                    backPointerList.Add(currentIndex);
                 }
 
-                return backPointerList;
+                return edgeList;
             }
             else
             {
-                return backPointerList;
+                return edgeList;
             }
         }
 
-        // MARK: HELPER METHODS
         private void ReevalutePathCost(int index)
         {
             double currentCost = pq.GetPathCost(index);
@@ -88,16 +116,26 @@ namespace NetworkRouting
             }
         }
 
-        private double GetDistance(PointF p1, PointF p2)
+        private void populateAllPaths(int index)
         {
-            return Math.Sqrt(Math.Pow(p2.Y - p1.Y, 2) + Math.Pow(p2.X - p1.X, 2));
+            for (int i = 0; i < points.Count; i++)
+            {
+                if (i == startIndex)
+                {
+                    pq.Add(i, 0, i);
+                }
+                else
+                {
+                    pq.Add(i, Double.MaxValue, -1);
+                }
+            }
         }
 
         private void populateOnePath(int index)
         {
             foreach (int connection in adjacencyList[index])
             {
-                pq.Add(connection, GetDistance(points[startIndex], points[connection]), index);
+                pq.Add(connection, GetDistance(points[this.startIndex], points[connection]), index);
             }
         }
     }

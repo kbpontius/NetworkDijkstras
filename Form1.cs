@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
@@ -13,6 +14,9 @@ namespace NetworkRouting
     public partial class Form1 : Form
     {
         Pen pen = new Pen(Color.Red, 1f);
+        Stopwatch stopwatch = new Stopwatch();
+        double onePathTime = 0;
+        double allPathsTime = 0;
 
         public Form1()
         {
@@ -97,13 +101,32 @@ namespace NetworkRouting
         {
             LoadStartEndIndices();
 
-            if (startNodeIndex != -1 && stopNodeIndex != -1)
+            if (startNodeIndex != -1 && stopNodeIndex != -1 && startNodeIndex != stopNodeIndex)
             {
                 Dijkstras dk = new Dijkstras(startNodeIndex, stopNodeIndex, points, adjacencyList);
-                List<int> backPointerList = dk.ResolvePath();
+
+                stopwatch = Stopwatch.StartNew();
+                List<Edge> backPointerList = dk.CalculateOnePath();
+                stopwatch.Stop();
+
+                onePathTime = stopwatch.Elapsed.TotalMilliseconds;
+
+                stopwatch = Stopwatch.StartNew();
+                dk.CalculateAllPaths();
+                stopwatch.Stop();
+
+                allPathsTime = stopwatch.Elapsed.TotalMilliseconds;
+
+                oneTimeBox.Text = Convert.ToString(onePathTime / 1000);
+                allTimeBox.Text = Convert.ToString(allPathsTime / 1000);
 
                 if (backPointerList.Count > 0)
                 {
+                    Tuple<double, List<Edge>> calculations = CalculatePathCosts(backPointerList);
+                    backPointerList = calculations.Item2;
+                    double totalCost = calculations.Item1;
+                    pathCostBox.Text = Convert.ToString(totalCost);
+
                     DrawLineList(backPointerList);
                 }
                 else
@@ -113,44 +136,80 @@ namespace NetworkRouting
             }
             else
             {
-                seedUsedLabel.Text = "Invalid start/end nodes";
+                seedUsedLabel.Text = "Invalid start/end nodes.";
             }
         }
 
         private void LoadStartEndIndices()
         {
-            int desiredStartIndex = Convert.ToInt32(sourceNodeBox.Text);
-            int desiredStopIndex = Convert.ToInt32(targetNodeBox.Text);
-
-            if (desiredStartIndex < points.Count
-                    && desiredStartIndex >= 0)
+            if (sourceNodeBox.Text.Length > 0 && targetNodeBox.Text.Length > 0)
             {
-                startNodeIndex = desiredStartIndex;
-            }
+                int desiredStartIndex = Convert.ToInt32(sourceNodeBox.Text);
+                int desiredStopIndex = Convert.ToInt32(targetNodeBox.Text);
 
-            if (desiredStopIndex < points.Count
-                    && desiredStopIndex >= 0)
-            {
-                stopNodeIndex = desiredStopIndex;
-            }
+                if (desiredStartIndex < points.Count
+                        && desiredStartIndex >= 0)
+                {
+                    startNodeIndex = desiredStartIndex;
+                }
 
-            paintStartStopPoints();
+                if (desiredStopIndex < points.Count
+                        && desiredStopIndex >= 0)
+                {
+                    stopNodeIndex = desiredStopIndex;
+                }
+
+                paintStartStopPoints();
+            }
         }
 
-        private void DrawLineList(List<int> pointerList)
+        public double FormatDecimal(double modifyMe, int numberOfDecimals)
         {
-            for (int i = 0; i < pointerList.Count - 2; i++)
+            double decimalPlaceMultiplier = Math.Pow(10, numberOfDecimals);
+            return Convert.ToInt32(modifyMe * decimalPlaceMultiplier) / decimalPlaceMultiplier;
+        }
+
+        private void DrawLineList(List<Edge> pointerList)
+        {
+            for (int i = 0; i < pointerList.Count; i++)
             {
-                DrawLine(points[pointerList[i]], points[pointerList[i + 1]]);
+                DrawLine(pointerList[i].startPoint, pointerList[i].endPoint);
+                DrawPathCost(GetMidpoint(pointerList[i].startPoint, pointerList[i].endPoint), FormatDecimal(pointerList[i].pathCost, 2));
             }
 
-            DrawLine(points[pointerList[pointerList.Count - 2]], points[pointerList[pointerList.Count - 1]]);
+            pictureBox.Refresh();
+        }
+
+        private Tuple<double, List<Edge>> CalculatePathCosts(List<Edge> pointerList)
+        {
+            double totalCost = 0;
+
+            foreach (Edge edge in pointerList)
+            {
+                edge.pathCost = Dijkstras.GetDistance(edge.startPoint, edge.endPoint);
+                totalCost += edge.pathCost;
+            }
+
+            return Tuple.Create(totalCost, pointerList);
         }
 
         private void DrawLine(PointF point1, PointF point2)
         {
             graphics.DrawLine(pen, point1, point2);
-            pictureBox.Refresh();
+        }
+
+        private void DrawPathCost(PointF midpoint, double pathCost)
+        {
+            graphics.DrawString(Convert.ToString(pathCost), new Font(FontFamily.GenericSansSerif, 10, FontStyle.Regular), new SolidBrush(Color.Red), midpoint);
+        }
+
+        private PointF GetMidpoint(PointF p1, PointF p2)
+        {
+            PointF midpoint = new PointF();
+            midpoint.X = ((p2.X - p1.X) / 2) + p1.X;
+            midpoint.Y = ((p2.Y - p1.Y) / 2) + p1.Y;
+
+            return midpoint;
         }
 
         private Boolean startStopToggle = true;

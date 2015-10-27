@@ -185,6 +185,7 @@
             // 
             // allTimeBox
             // 
+            this.allTimeBox.Enabled = false;
             this.allTimeBox.Location = new System.Drawing.Point(89, 370);
             this.allTimeBox.Name = "allTimeBox";
             this.allTimeBox.Size = new System.Drawing.Size(58, 20);
@@ -192,6 +193,7 @@
             // 
             // oneTimeBox
             // 
+            this.oneTimeBox.Enabled = false;
             this.oneTimeBox.Location = new System.Drawing.Point(237, 370);
             this.oneTimeBox.Name = "oneTimeBox";
             this.oneTimeBox.Size = new System.Drawing.Size(58, 20);
