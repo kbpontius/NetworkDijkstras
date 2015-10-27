@@ -119,6 +119,7 @@ namespace NetworkRouting
 
                 oneTimeBox.Text = Convert.ToString(onePathTime / 1000);
                 allTimeBox.Text = Convert.ToString(allPathsTime / 1000);
+                differenceBox.Text = Convert.ToString((allPathsTime - onePathTime) / (onePathTime + allPathsTime));
 
                 if (backPointerList.Count > 0)
                 {
