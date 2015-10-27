@@ -74,6 +74,11 @@ namespace NetworkRouting
                     }
                 }
 
+                if (pq.AllPathsIsFinished())
+                {
+                    break;
+                }
+
                 currentIndex = pq.PopMin();
 
                 if (currentIndex == startIndex)

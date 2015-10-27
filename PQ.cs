@@ -147,6 +147,11 @@ namespace NetworkRouting
             heap[i2] = tempNode;
         }
 
+        public bool AllPathsIsFinished()
+        {
+            return heap[0].pathCost == double.MaxValue;
+        }
+
         // MARK: INDEX GETTER METHODS
         private int GetParentIndex(int index)
         {
